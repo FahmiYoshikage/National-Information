@@ -38,15 +38,14 @@ SCHEDULE = "0 */15 * * * *"
 def format_message(article: Article) -> str:
     lines = [
         f"<b>{article.source}</b>",
-        "",
         f"📌 <b>{article.title}</b>",
     ]
     if article.published:
-        lines.append(f"🕒 {article.published}")
+        lines.append(f"🕒 <i>{article.published}</i>")
+    lines.append("━━━━━━━━━━━━━━━━━━━━")
     if article.summary:
-        lines.append("")
         lines.append(article.summary)
-    lines.append("")
+        lines.append("")
     lines.append(f'🔗 <a href="{article.url}">Baca selengkapnya</a>')
     return "\n".join(lines)
 

@@ -52,10 +52,13 @@ def _get_image(entry) -> Optional[str]:
     return None
 
 
-def _clean_summary(raw: str, max_len: int = 300) -> str:
+def _clean_summary(raw: str, max_len: int = 700) -> str:
     """Hapus tag HTML sederhana dan potong text jika terlalu panjang."""
     import re
     text = re.sub(r"<[^>]+>", "", raw or "")
+    # Bersihkan whitespace berlebih dan baris kosong berganda
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = re.sub(r" {2,}", " ", text)
     text = text.strip()
     if len(text) > max_len:
         text = text[:max_len].rsplit(" ", 1)[0] + "…"
@@ -77,7 +80,15 @@ def fetch_feed(source_name: str, feed_url: str) -> List[Article]:
                 continue
 
             title = entry.get("title", "Tanpa Judul").strip()
-            summary = _clean_summary(entry.get("summary", ""))
+
+            # Ambil teks terpanjang yang tersedia: content > summary > description
+            raw_text = ""
+            if hasattr(entry, "content") and entry.content:
+                raw_text = entry.content[0].get("value", "")
+            if not raw_text:
+                raw_text = entry.get("summary", "") or entry.get("description", "")
+
+            summary = _clean_summary(raw_text)
             image = _get_image(entry)
 
             # Format tanggal
